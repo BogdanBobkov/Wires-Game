@@ -98,22 +98,24 @@ namespace Controllers
 #elif UNITY_IOS || UNITY_ANDROID
                 if (Input.touchCount == 1)
                 {
-                    Touch touch = Input.GetTouch(0);
-
-                    Ray ray = Camera.main.ScreenPointToRay(Input.touches[0].position);
-                    RaycastHit hit;
+                    var touch = Input.GetTouch(0);
+                    _pointerEventData = new PointerEventData(_eventSystem);
+                    _pointerEventData.position = touch.position;
+                    var results = new List<RaycastResult>();
+                    _raycaster.Raycast(_pointerEventData, results);
 
                     switch (touch.phase)
                     {
                         case TouchPhase.Began:
                             {
-                                if (Physics.Raycast(ray, out hit))
+                                foreach (RaycastResult result in results)
                                 {
-                                    var entityWall = hit.collider.GetComponent<EntityWall>();
+                                    var entityWall = result.gameObject.GetComponent<EntityWall>();
                                     if (entityWall != null && !entityWall.IsConnected)
                                     {
                                         _startTouchedWall = entityWall;
-                                        Debug.Log("You touched on " + _startTouchedWall.name);
+                                        _currentLineRenderer = Instantiate(_LineRendererPrefab, transform).GetComponent<LineEntity>();
+                                        _currentLineRenderer.Initialize(entityWall.Image.color, _startTouchedWall.transform.position);
                                     }
                                 }
                                 break;
@@ -121,21 +123,35 @@ namespace Controllers
 
                         case TouchPhase.Ended:
                             {
-                                if (Physics.Raycast(ray, out hit))
+                                if (_startTouchedWall != null)
                                 {
-                                    var entityWall = hit.collider.GetComponent<EntityWall>();
-                                    if (entityWall != null && entityWall != _startTouchedWall)
+                                    foreach (RaycastResult result in results)
                                     {
-                                        _startTouchedWall.IsConnected = true;
-                                        entityWall.IsConnected = true;
-                                        _connectedWallsCount += 2;
-                                        Debug.Log("You touched off " + entityWall.name);
+                                        var entityWall = result.gameObject.GetComponent<EntityWall>();
+                                        if (entityWall != null && entityWall != _startTouchedWall && entityWall.Image.color == _startTouchedWall.Image.color)
+                                        {
+                                            _startTouchedWall.IsConnected = true;
+                                            entityWall.IsConnected = true;
+                                            _connectedWallsCount += 2;
+                                            _currentLineRenderer.OnEndMovingLine();
+                                            _linesList.Add(_currentLineRenderer);
+                                            _currentLineRenderer = null;
+                                            _startTouchedWall = null;
 
-                                        if (_connectedWallsCount == _amountWallsAtMap) OnWallsConnected?.Invoke();
+                                            if (_connectedWallsCount == _amountWallsAtMap)
+                                            {
+                                                _connectedWallsCount = 0;
+                                                OnWallsConnected?.Invoke();
+                                            }
+
+                                            return;
+                                        }
                                     }
-                                }
 
-                                _startTouchedWall = null;
+                                    if (_currentLineRenderer != null) Destroy(_currentLineRenderer.gameObject);
+                                    _currentLineRenderer = null;
+                                    _startTouchedWall = null;
+                                }
                                 break;
                             }
                     }
