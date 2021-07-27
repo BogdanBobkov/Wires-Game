@@ -802,26 +802,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1060255579, guid: 589f4333c011f724996b94249bf3e73e, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1060255579, guid: 589f4333c011f724996b94249bf3e73e, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1060255579, guid: 589f4333c011f724996b94249bf3e73e, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: -17
-      objectReference: {fileID: 0}
-    - target: {fileID: 1768875553, guid: 589f4333c011f724996b94249bf3e73e, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1768875553, guid: 589f4333c011f724996b94249bf3e73e, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 7672694264785404627, guid: 589f4333c011f724996b94249bf3e73e, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -909,10 +889,6 @@ PrefabInstance:
     - target: {fileID: 7672694264785404632, guid: 589f4333c011f724996b94249bf3e73e, type: 3}
       propertyPath: m_Name
       value: Canvas Leaderboard
-      objectReference: {fileID: 0}
-    - target: {fileID: 7672694264785404632, guid: 589f4333c011f724996b94249bf3e73e, type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 589f4333c011f724996b94249bf3e73e, type: 3}
