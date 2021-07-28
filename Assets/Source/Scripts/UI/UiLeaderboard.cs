@@ -20,13 +20,10 @@ namespace UI
                     this.score = score;
                 }
 
-                [JsonProperty("name")]
                 public string name;
-                [JsonProperty("score")]
                 public int    score;
             }
 
-            [JsonProperty("bestPlayers")]
             public List<Player> bestPlayers = new List<Player>();
         }
 
@@ -41,14 +38,11 @@ namespace UI
 
         private string PathFile;
 
-        private void Start()
-        {
-            PathFile = Path.Combine(Application.temporaryCachePath, "leaderboard.json");
-        }
-
         public void Show(int score, string name)
         {
-            if(_leaderBoard == null)
+            PathFile = Path.Combine(Application.temporaryCachePath, "leaderboard.json");
+
+            if (_leaderBoard == null)
             {
                 if (File.Exists(PathFile))
                 {
@@ -63,6 +57,8 @@ namespace UI
 
             var player = new LeaderBoard.Player(score, name);
             TryInsertPlayerToLeaderBoard(player);
+
+            File.WriteAllText(PathFile, JsonConvert.SerializeObject(_leaderBoard));
 
             gameObject.SetActive(true);
         }
@@ -108,11 +104,6 @@ namespace UI
 
         public new void Hide()
         {
-            if (_leaderBoard != null)
-            {
-                File.WriteAllText(PathFile, JsonConvert.SerializeObject(_leaderBoard));
-            }
-
             foreach(var element in _Content)
             {
                 Destroy(element);
