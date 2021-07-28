@@ -30,7 +30,6 @@ namespace UI
             public List<Player> bestPlayers = new List<Player>();
         }
 
-        private readonly string PathFile = Path.Combine(Application.temporaryCachePath, "leaderboard.json");
 
         [SerializeField] private GameObject _PrefabContent;
 
@@ -39,6 +38,13 @@ namespace UI
         private LeaderBoard _leaderBoard;
 
         private int _maxPlayersInLeaderboard = 10;
+
+        private string PathFile;
+
+        private void Start()
+        {
+            PathFile = Path.Combine(Application.temporaryCachePath, "leaderboard.json");
+        }
 
         public void Show(int score, string name)
         {
