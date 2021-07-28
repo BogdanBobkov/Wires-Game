@@ -1,33 +1,15 @@
 using Internals;
 using Newtonsoft.Json;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using UnityEngine;
+using Others;
 
 namespace UI
 {
     public class UiLeaderboard : UiCanvas
     {
-        public class LeaderBoard
-        {
-            public class Player
-            {
-                public Player(int score, string name)
-                {
-                    this.name = name;
-                    this.score = score;
-                }
-
-                public string name;
-                public int    score;
-            }
-
-            public List<Player> bestPlayers = new List<Player>();
-        }
-
-
         [SerializeField] private GameObject _PrefabContent;
 
         private List<GameObject> _Content = new List<GameObject>();
@@ -40,7 +22,7 @@ namespace UI
 
         public void Show(int score, string name)
         {
-            PathFile = Path.Combine(Application.temporaryCachePath, "leaderboard.json");
+            PathFile = Path.Combine(Application.temporaryCachePath, PublicConst.LeaderboardFile);
 
             if (_leaderBoard == null)
             {
@@ -102,7 +84,7 @@ namespace UI
 
         public void ReplayGame() => Locator.GameplayController.StartGame();
 
-        public new void Hide()
+        public override void Hide()
         {
             foreach(var element in _Content)
             {

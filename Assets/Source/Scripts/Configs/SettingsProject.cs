@@ -4,11 +4,11 @@ namespace Configs
 {
     public class SettingsProject
     {
-        public float StartM { private set; get; }
-        public int StartN { private set; get; }
-        public float ChangeMOnNextLevel { private set; get; }
-        public int ChangeNOnNextLevel { private set; get; }
-        public int AddScoreOnNextLevel { private set; get; }
+        [JsonProperty("StartM")]              public float StartM { private set; get; }
+        [JsonProperty("StartN")]              public int StartN { private set; get; }
+        [JsonProperty("ChangeMOnNextLevel")]  public float ChangeMOnNextLevel { private set; get; }
+        [JsonProperty("ChangeNOnNextLevel")]  public int ChangeNOnNextLevel { private set; get; }
+        [JsonProperty("AddScoreOnNextLevel")] public int AddScoreOnNextLevel { private set; get; }
 
         public SettingsProject()
         {

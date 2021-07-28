@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System.IO;
 using System;
 using Internals;
+using Others;
 
 namespace Controllers
 {
@@ -23,7 +24,7 @@ namespace Controllers
 
         private void Start()
         {
-            var path = Path.Combine(Application.persistentDataPath, "settings.json");
+            var path = Path.Combine(Application.persistentDataPath, PublicConst.SettingsFile);
             if (File.Exists(path))
             {
                 _settingsProject = JsonConvert.DeserializeObject<SettingsProject>(File.ReadAllText(path));
