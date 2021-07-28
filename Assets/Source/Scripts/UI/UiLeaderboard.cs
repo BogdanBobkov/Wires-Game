@@ -30,7 +30,7 @@ namespace UI
             public List<Player> bestPlayers = new List<Player>();
         }
 
-        private readonly string FileName = "leaderboard.json";
+        private readonly string PathFile = Path.Combine(Application.temporaryCachePath, "leaderboard.json");
 
         [SerializeField] private GameObject _PrefabContent;
 
@@ -44,15 +44,14 @@ namespace UI
         {
             if(_leaderBoard == null)
             {
-                var path = Path.Combine(Application.temporaryCachePath, FileName);
-                if (File.Exists(path))
+                if (File.Exists(PathFile))
                 {
-                    _leaderBoard = JsonConvert.DeserializeObject<LeaderBoard>(File.ReadAllText(path));
+                    _leaderBoard = JsonConvert.DeserializeObject<LeaderBoard>(File.ReadAllText(PathFile));
                 }
                 else
                 {
                     _leaderBoard = new LeaderBoard();
-                    File.WriteAllText(path, JsonConvert.SerializeObject(_leaderBoard));
+                    File.WriteAllText(PathFile, JsonConvert.SerializeObject(_leaderBoard));
                 }
             }
 
@@ -105,7 +104,7 @@ namespace UI
         {
             if (_leaderBoard != null)
             {
-                File.WriteAllText(Path.Combine(Application.persistentDataPath, FileName), JsonConvert.SerializeObject(_leaderBoard));
+                File.WriteAllText(PathFile, JsonConvert.SerializeObject(_leaderBoard));
             }
 
             foreach(var element in _Content)
