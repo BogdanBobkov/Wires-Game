@@ -42,121 +42,93 @@ namespace Controllers
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR
                 if (Input.GetMouseButtonDown(0))
                 {
-                    _pointerEventData           = new PointerEventData(_eventSystem);
-                    _pointerEventData.position  = Input.mousePosition;
-                    List<RaycastResult> results = new List<RaycastResult>();
-                    _raycaster.Raycast(_pointerEventData, results);
-
-                    foreach (RaycastResult result in results)
-                    {
-                        var entityWall = result.gameObject.GetComponent<EntityWall>();
-                        if (entityWall != null && !entityWall.IsConnected)
-                        {
-                            _startTouchedWall = entityWall;
-                            _currentLineRenderer = Instantiate(_LineRendererPrefab, transform).GetComponent<LineEntity>();
-                            _currentLineRenderer.Initialize(entityWall.Image.color, _startTouchedWall.transform.position);
-                        }
-                    }
+                    TouchDown(Input.mousePosition);
                 }
                 else if(Input.GetMouseButtonUp(0))
                 {
-                    if (_startTouchedWall != null)
-                    {
-                        _pointerEventData           = new PointerEventData(_eventSystem);
-                        _pointerEventData.position = Input.mousePosition;
-                        var results = new List<RaycastResult>();
-                        _raycaster.Raycast(_pointerEventData, results);
-
-                        foreach (RaycastResult result in results)
-                        {
-                            var entityWall = result.gameObject.GetComponent<EntityWall>();
-                            if (entityWall != null && entityWall != _startTouchedWall && entityWall.Image.color == _startTouchedWall.Image.color)
-                            {
-                                _startTouchedWall.IsConnected = true;
-                                entityWall.IsConnected        = true;
-                                _connectedWallsCount          += 2;
-                                _currentLineRenderer.OnEndMovingLine();
-                                _linesStack.Push(_currentLineRenderer);
-                                _currentLineRenderer          = null;
-                                _startTouchedWall             = null;
-
-                                if (_connectedWallsCount == _amountWallsAtMap)
-                                {
-                                    _connectedWallsCount = 0;
-                                    OnWallsConnected?.Invoke();
-                                }
-
-                                return;
-                            }
-                        }
-
-                        if (_currentLineRenderer != null) Destroy(_currentLineRenderer.gameObject);
-                        _currentLineRenderer = null;
-                        _startTouchedWall = null;
-                    }
+                    TouchUp(Input.mousePosition);
                 }
 #elif UNITY_IOS || UNITY_ANDROID
                 if (Input.touchCount == 1)
                 {
                     var touch = Input.GetTouch(0);
-                    _pointerEventData = new PointerEventData(_eventSystem);
-                    _pointerEventData.position = touch.position;
-                    var results = new List<RaycastResult>();
-                    _raycaster.Raycast(_pointerEventData, results);
 
                     switch (touch.phase)
                     {
                         case TouchPhase.Began:
                             {
-                                foreach (RaycastResult result in results)
-                                {
-                                    var entityWall = result.gameObject.GetComponent<EntityWall>();
-                                    if (entityWall != null && !entityWall.IsConnected)
-                                    {
-                                        _startTouchedWall = entityWall;
-                                        _currentLineRenderer = Instantiate(_LineRendererPrefab, transform).GetComponent<LineEntity>();
-                                        _currentLineRenderer.Initialize(entityWall.Image.color, _startTouchedWall.transform.position);
-                                    }
-                                }
+                                TouchDown(touch.position);
                                 break;
                             }
 
                         case TouchPhase.Ended:
                             {
-                                if (_startTouchedWall != null)
-                                {
-                                    foreach (RaycastResult result in results)
-                                    {
-                                        var entityWall = result.gameObject.GetComponent<EntityWall>();
-                                        if (entityWall != null && entityWall != _startTouchedWall && entityWall.Image.color == _startTouchedWall.Image.color)
-                                        {
-                                            _startTouchedWall.IsConnected = true;
-                                            entityWall.IsConnected        = true;
-                                            _connectedWallsCount          += 2;
-                                            _currentLineRenderer.OnEndMovingLine();
-                                            _linesList.Add(_currentLineRenderer);
-                                            _currentLineRenderer          = null;
-                                            _startTouchedWall             = null;
-
-                                            if (_connectedWallsCount == _amountWallsAtMap)
-                                            {
-                                                _connectedWallsCount = 0;
-                                                OnWallsConnected?.Invoke();
-                                            }
-
-                                            return;
-                                        }
-                                    }
-
-                                    if (_currentLineRenderer != null) Destroy(_currentLineRenderer.gameObject);
-                                    _currentLineRenderer = null;
-                                    _startTouchedWall = null;
-                                }
+                                TouchUp(touch.position);
                                 break;
                             }
                     }
                 }
 #endif
+            }
+            else if (_currentLineRenderer != null)
+            {
+                if (_currentLineRenderer != null) Destroy(_currentLineRenderer.gameObject);
+            }
+        }
+
+        private void TouchDown(Vector3 position)
+        {
+            _pointerEventData = new PointerEventData(_eventSystem);
+            _pointerEventData.position = position;
+            List<RaycastResult> results = new List<RaycastResult>();
+            _raycaster.Raycast(_pointerEventData, results);
+
+            foreach (RaycastResult result in results)
+            {
+                var entityWall = result.gameObject.GetComponent<EntityWall>();
+                if (entityWall != null && !entityWall.IsConnected)
+                {
+                    _startTouchedWall = entityWall;
+                    _currentLineRenderer = Instantiate(_LineRendererPrefab, transform).GetComponent<LineEntity>();
+                    _currentLineRenderer.Initialize(entityWall.Image.color, _startTouchedWall.transform.position);
+                }
+            }
+        }
+
+        private void TouchUp(Vector3 position)
+        {
+            if (_startTouchedWall != null)
+            {
+                _pointerEventData = new PointerEventData(_eventSystem);
+                _pointerEventData.position = position;
+                var results = new List<RaycastResult>();
+                _raycaster.Raycast(_pointerEventData, results);
+
+                foreach (RaycastResult result in results)
+                {
+                    var entityWall = result.gameObject.GetComponent<EntityWall>();
+                    if (entityWall != null && entityWall != _startTouchedWall && entityWall.Image.color == _startTouchedWall.Image.color)
+                    {
+                        _startTouchedWall.IsConnected = true;
+                        entityWall.IsConnected = true;
+                        _connectedWallsCount += 2;
+                        _currentLineRenderer.OnEndMovingLine();
+                        _linesStack.Push(_currentLineRenderer);
+                        _currentLineRenderer = null;
+                        _startTouchedWall = null;
+
+                        if (_connectedWallsCount == _amountWallsAtMap)
+                        {
+                            _connectedWallsCount = 0;
+                            OnWallsConnected?.Invoke();
+                        }
+
+                        return;
+                    }
+                }
+
+                if (_currentLineRenderer != null) Destroy(_currentLineRenderer.gameObject);
+                _startTouchedWall = null;
             }
         }
 
