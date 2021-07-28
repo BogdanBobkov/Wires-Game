@@ -44,7 +44,7 @@ namespace UI
         {
             if(_leaderBoard == null)
             {
-                var path = Path.Combine(Application.persistentDataPath, FileName);
+                var path = Path.Combine(Application.temporaryCachePath, FileName);
                 if (File.Exists(path))
                 {
                     _leaderBoard = JsonConvert.DeserializeObject<LeaderBoard>(File.ReadAllText(path));

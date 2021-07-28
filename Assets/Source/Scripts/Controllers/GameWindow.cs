@@ -15,8 +15,8 @@ namespace Controllers
         [SerializeField] private EventSystem      _eventSystem;
         [SerializeField] private GameObject       _PrefabWall;
         [SerializeField] private GameObject       _LineRendererPrefab;
-        private List<EntityWall>                  _wallsList = new List<EntityWall>();
-        private List<LineEntity>                _linesList = new List<LineEntity>();
+        private Stack<EntityWall>                 _wallsStack = new Stack<EntityWall>();
+        private Stack<LineEntity>                 _linesStack = new Stack<LineEntity>();
 
         private EntityWall _startTouchedWall;
         private LineEntity _currentLineRenderer;
@@ -25,7 +25,7 @@ namespace Controllers
 
         public event Action OnWallsConnected;
 
-        private int _amountWallsAtMap = 0;
+        private int _amountWallsAtMap   = 0;
         private int _connectedWallsCount = 0;
 
         private PointerEventData _pointerEventData;
@@ -62,7 +62,7 @@ namespace Controllers
                 {
                     if (_startTouchedWall != null)
                     {
-                        _pointerEventData = new PointerEventData(_eventSystem);
+                        _pointerEventData           = new PointerEventData(_eventSystem);
                         _pointerEventData.position = Input.mousePosition;
                         var results = new List<RaycastResult>();
                         _raycaster.Raycast(_pointerEventData, results);
@@ -73,12 +73,12 @@ namespace Controllers
                             if (entityWall != null && entityWall != _startTouchedWall && entityWall.Image.color == _startTouchedWall.Image.color)
                             {
                                 _startTouchedWall.IsConnected = true;
-                                entityWall.IsConnected = true;
-                                _connectedWallsCount += 2;
+                                entityWall.IsConnected        = true;
+                                _connectedWallsCount          += 2;
                                 _currentLineRenderer.OnEndMovingLine();
-                                _linesList.Add(_currentLineRenderer);
-                                _currentLineRenderer = null;
-                                _startTouchedWall = null;
+                                _linesStack.Push(_currentLineRenderer);
+                                _currentLineRenderer          = null;
+                                _startTouchedWall             = null;
 
                                 if (_connectedWallsCount == _amountWallsAtMap)
                                 {
@@ -131,12 +131,12 @@ namespace Controllers
                                         if (entityWall != null && entityWall != _startTouchedWall && entityWall.Image.color == _startTouchedWall.Image.color)
                                         {
                                             _startTouchedWall.IsConnected = true;
-                                            entityWall.IsConnected = true;
-                                            _connectedWallsCount += 2;
+                                            entityWall.IsConnected        = true;
+                                            _connectedWallsCount          += 2;
                                             _currentLineRenderer.OnEndMovingLine();
                                             _linesList.Add(_currentLineRenderer);
-                                            _currentLineRenderer = null;
-                                            _startTouchedWall = null;
+                                            _currentLineRenderer          = null;
+                                            _startTouchedWall             = null;
 
                                             if (_connectedWallsCount == _amountWallsAtMap)
                                             {
@@ -177,7 +177,7 @@ namespace Controllers
                 entityWall.Image.color = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
 
                 colors.Push(entityWall.Image.color);
-                _wallsList.Add(entityWall);
+                _wallsStack.Push(entityWall);
             }
 
             colors = new Stack<Color>(colors.OrderBy(x => Guid.NewGuid().ToString()));
@@ -192,17 +192,14 @@ namespace Controllers
                 entityWall.BoxCollider2D.size = wall.sizeDelta;
                 entityWall.Image.color = colors.Pop();
 
-                _wallsList.Add(entityWall);
+                _wallsStack.Push(entityWall);
             }
         }
 
         public void ClearWindow()
         {
-            foreach(var wall in _wallsList) Destroy(wall.gameObject);
-            foreach (var line in _linesList) Destroy(line.gameObject);
-
-            _wallsList.Clear();
-            _linesList.Clear();
+            while(_wallsStack.Count > 0) Destroy(_wallsStack.Pop());
+            while(_linesStack.Count > 0) Destroy(_linesStack.Pop());
         }
     }
 }
