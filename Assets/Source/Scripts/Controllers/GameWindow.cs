@@ -28,11 +28,13 @@ namespace Controllers
         private int _amountWallsAtMap   = 0;
         private int _connectedWallsCount = 0;
 
-        private PointerEventData _pointerEventData;
+        private PointerEventData    _pointerEventData;
+        private List<RaycastResult> _raycastResults = new List<RaycastResult>();
 
         private void Awake()
         {
             _screenSize = new Vector2(Screen.width, Screen.height);
+            _pointerEventData = new PointerEventData(_eventSystem);
         }
 
         private void Update()
@@ -69,6 +71,7 @@ namespace Controllers
                     }
                 }
 #endif
+                _raycastResults.Clear();
             }
             else if (_currentLineRenderer != null)
             {
@@ -78,12 +81,10 @@ namespace Controllers
 
         private void TouchDown(Vector3 position)
         {
-            _pointerEventData = new PointerEventData(_eventSystem);
             _pointerEventData.position = position;
-            List<RaycastResult> results = new List<RaycastResult>();
-            _raycaster.Raycast(_pointerEventData, results);
+            _raycaster.Raycast(_pointerEventData, _raycastResults);
 
-            foreach (RaycastResult result in results)
+            foreach (RaycastResult result in _raycastResults)
             {
                 var entityWall = result.gameObject.GetComponent<EntityWall>();
                 if (entityWall != null && !entityWall.IsConnected)
@@ -99,12 +100,10 @@ namespace Controllers
         {
             if (_startTouchedWall != null)
             {
-                _pointerEventData = new PointerEventData(_eventSystem);
                 _pointerEventData.position = position;
-                var results = new List<RaycastResult>();
-                _raycaster.Raycast(_pointerEventData, results);
+                _raycaster.Raycast(_pointerEventData, _raycastResults);
 
-                foreach (RaycastResult result in results)
+                foreach (RaycastResult result in _raycastResults)
                 {
                     var entityWall = result.gameObject.GetComponent<EntityWall>();
                     if (entityWall != null && entityWall != _startTouchedWall && entityWall.Image.color == _startTouchedWall.Image.color)
@@ -140,38 +139,44 @@ namespace Controllers
 
             for(int i = 0; i < numWalls / 2; i++)
             {
-                var wall = Instantiate(_PrefabWall, transform).GetComponent<RectTransform>();
-                wall.sizeDelta = new Vector2(_screenSize.y / (numWalls * 2 + 1) / 2, _screenSize.y / (numWalls + 1));
-                wall.anchoredPosition = new Vector2(-_screenSize.x / 2 + wall.sizeDelta.x / 2, wall.sizeDelta.y * (2 * i + 1) + wall.sizeDelta.y / 2);
-
-                var entityWall = wall.GetComponent<EntityWall>();
-                entityWall.BoxCollider2D.size = wall.sizeDelta;
+                var entityWall = CreateEntityWall(
+                                    new Vector2(-_screenSize.x / 2 + _screenSize.y / (numWalls * 2 + 1) / 4, _screenSize.y / (numWalls + 1) * (3 + 4 * i) / 2),
+                                    new Vector2(_screenSize.y / (numWalls * 2 + 1) / 2, _screenSize.y / (numWalls + 1))
+                                                 );
                 entityWall.Image.color = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
-
                 colors.Push(entityWall.Image.color);
-                _wallsStack.Push(entityWall);
             }
 
             colors = new Stack<Color>(colors.OrderBy(x => Guid.NewGuid().ToString()));
 
             for (int i = 0; i < numWalls / 2; i++)
             {
-                var wall = Instantiate(_PrefabWall, transform).GetComponent<RectTransform>();
-                wall.sizeDelta = new Vector2(_screenSize.y / (numWalls * 2 + 1) / 2, _screenSize.y / (numWalls + 1));
-                wall.anchoredPosition = new Vector2(_screenSize.x / 2 - wall.sizeDelta.x / 2, wall.sizeDelta.y * (2 * i + 1) + wall.sizeDelta.y / 2);
+                var entityWall = CreateEntityWall(
+                                    new Vector2(_screenSize.x / 2 - _screenSize.y / (numWalls * 2 + 1) / 4, _screenSize.y / (numWalls + 1) * (3 + 4 * i) / 2),
+                                    new Vector2(_screenSize.y / (numWalls * 2 + 1) / 2, _screenSize.y / (numWalls + 1))
+                                 );
 
-                var entityWall = wall.GetComponent<EntityWall>();
-                entityWall.BoxCollider2D.size = wall.sizeDelta;
                 entityWall.Image.color = colors.Pop();
-
-                _wallsStack.Push(entityWall);
             }
+        }
+
+        private EntityWall CreateEntityWall(Vector2 position, Vector2 size)
+        {
+            var wall              = Instantiate(_PrefabWall, transform).GetComponent<RectTransform>();
+            wall.sizeDelta        = size;
+            wall.anchoredPosition = position;
+
+            var entityWall                = wall.GetComponent<EntityWall>();
+            entityWall.BoxCollider2D.size = wall.sizeDelta;
+            _wallsStack.Push(entityWall);
+
+            return entityWall;
         }
 
         public void ClearWindow()
         {
-            while(_wallsStack.Count > 0) Destroy(_wallsStack.Pop());
-            while(_linesStack.Count > 0) Destroy(_linesStack.Pop());
+            while(_wallsStack.Count > 0) Destroy(_wallsStack.Pop().gameObject);
+            while(_linesStack.Count > 0) Destroy(_linesStack.Pop().gameObject);
         }
     }
 }
