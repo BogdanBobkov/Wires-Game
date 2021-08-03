@@ -19,9 +19,4 @@ namespace Internals
 
         [JsonProperty("bestPlayers")] public List<Player> bestPlayers = new List<Player>();
     }
-
-    public class Player
-    {
-
-    }
 }
