@@ -1,27 +1,19 @@
-using UnityEngine;
-using UI;
-using Controllers;
+using System;
+using System.Collections.Generic;
 
 namespace Internals
 {
-    public class Locator : MonoBehaviour
+    public static class Locator
     {
-        private static Locator _instance;
+        private static Dictionary<Type, object> _map = new Dictionary<Type, object>();
 
-        [SerializeField] private UiSwitcher _uiSwitcher;
-        public static UiSwitcher UiSwitcher => _instance._uiSwitcher;
+        public static void Register(Type type, object @object) => _map[type] = @object;
+        public static void Unregister(Type type) => _map.Remove(type);
 
-        [SerializeField] private GameplayController _gameplayController;
-        public static GameplayController GameplayController => _instance._gameplayController;
-
-        private void Awake()
+        public static T GetObject<T>() where T : class
         {
-            if (_instance != null)
-            {
-                Destroy(this);
-                return;
-            }
-            _instance = this;
+            if (!_map.ContainsKey(typeof(T))) return null;
+            else return (T)_map[typeof(T)];
         }
     }
 }

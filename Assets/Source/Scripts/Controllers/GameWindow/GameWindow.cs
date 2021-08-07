@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Internals;
@@ -9,7 +8,7 @@ using UnityEngine.EventSystems;
 
 namespace Controllers
 {
-    public class GameWindow : MonoBehaviour
+    public class GameWindow : MonoBehaviour, IGameView
     {
         [SerializeField] private GraphicRaycaster _raycaster;
         [SerializeField] private EventSystem      _eventSystem;
@@ -23,32 +22,37 @@ namespace Controllers
 
         private Vector2 _screenSize;
 
-        public event Action OnWallsConnected;
-
         private int _amountWallsAtMap   = 0;
         private int _connectedWallsCount = 0;
 
         private PointerEventData    _pointerEventData;
         private List<RaycastResult> _raycastResults = new List<RaycastResult>();
 
+        private IGameplayControllable _gameplayController;
+
         private void Awake()
         {
-            _screenSize = new Vector2(Screen.width, Screen.height);
-            _pointerEventData = new PointerEventData(_eventSystem);
+            Register();
+
+            _screenSize         = new Vector2(Screen.width, Screen.height);
+            _gameplayController = Locator.GetObject<IGameplayControllable>();
+            _pointerEventData   = new PointerEventData(_eventSystem);
         }
+
+        private void OnDestroy() => Unregister();
 
         private void Update()
         {
-            if (Locator.GameplayController.IsGame)
+            if (_gameplayController.IsGame())
             {
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR
                 if (Input.GetMouseButtonDown(0))
                 {
-                    TouchDown(Input.mousePosition);
+                    OnTouchDown(Input.mousePosition);
                 }
-                else if(Input.GetMouseButtonUp(0))
+                else if (Input.GetMouseButtonUp(0))
                 {
-                    TouchUp(Input.mousePosition);
+                    OnTouchUp(Input.mousePosition);
                 }
 #elif UNITY_IOS || UNITY_ANDROID
                 if (Input.touchCount == 1)
@@ -59,13 +63,13 @@ namespace Controllers
                     {
                         case TouchPhase.Began:
                             {
-                                TouchDown(touch.position);
+                                OnTouchDown(touch.position);
                                 break;
                             }
 
                         case TouchPhase.Ended:
                             {
-                                TouchUp(touch.position);
+                                OnTouchUp(touch.position);
                                 break;
                             }
                     }
@@ -73,15 +77,11 @@ namespace Controllers
 #endif
                 _raycastResults.Clear();
             }
-            else if (_currentLineRenderer != null)
-            {
-                if (_currentLineRenderer != null) Destroy(_currentLineRenderer.gameObject);
-            }
         }
 
-        private void TouchDown(Vector3 position)
+        public void OnTouchDown(Vector3 downPosition)
         {
-            _pointerEventData.position = position;
+            _pointerEventData.position = downPosition;
             _raycaster.Raycast(_pointerEventData, _raycastResults);
 
             foreach (RaycastResult result in _raycastResults)
@@ -92,15 +92,17 @@ namespace Controllers
                     _startTouchedWall = entityWall;
                     _currentLineRenderer = Instantiate(_LineRendererPrefab, transform).GetComponent<LineEntity>();
                     _currentLineRenderer.Initialize(entityWall.Image.color, _startTouchedWall.transform.position);
+
+                    return;
                 }
             }
         }
 
-        private void TouchUp(Vector3 position)
+        public void OnTouchUp(Vector3 upPosition)
         {
             if (_startTouchedWall != null)
             {
-                _pointerEventData.position = position;
+                _pointerEventData.position = upPosition;
                 _raycaster.Raycast(_pointerEventData, _raycastResults);
 
                 foreach (RaycastResult result in _raycastResults)
@@ -125,11 +127,26 @@ namespace Controllers
                         return;
                     }
                 }
-
                 if (_currentLineRenderer != null) Destroy(_currentLineRenderer.gameObject);
                 _startTouchedWall = null;
             }
         }
+
+        private EntityWall CreateEntityWall(Vector2 position, Vector2 size)
+        {
+            var wall              = Instantiate(_PrefabWall, transform).GetComponent<RectTransform>();
+            wall.sizeDelta        = size;
+            wall.anchoredPosition = position;
+
+            var entityWall                = wall.GetComponent<EntityWall>();
+            entityWall.BoxCollider2D.size = wall.sizeDelta;
+            _wallsStack.Push(entityWall);
+
+            return entityWall;
+        }
+
+        #region Interfaces
+        public event Action OnWallsConnected;
 
         public void CreateWalls(int numWalls)
         {
@@ -139,7 +156,7 @@ namespace Controllers
 
             for (int i = 0; i < numWalls; i++)
             {
-                int sideScreen        = 0;
+                int sideScreen = 0;
                 Action onCreateAction = null;
                 EntityWall entityWall = null;
 
@@ -173,23 +190,16 @@ namespace Controllers
             }
         }
 
-        private EntityWall CreateEntityWall(Vector2 position, Vector2 size)
-        {
-            var wall              = Instantiate(_PrefabWall, transform).GetComponent<RectTransform>();
-            wall.sizeDelta        = size;
-            wall.anchoredPosition = position;
-
-            var entityWall                = wall.GetComponent<EntityWall>();
-            entityWall.BoxCollider2D.size = wall.sizeDelta;
-            _wallsStack.Push(entityWall);
-
-            return entityWall;
-        }
-
         public void ClearWindow()
         {
             while(_wallsStack.Count > 0) Destroy(_wallsStack.Pop().gameObject);
             while(_linesStack.Count > 0) Destroy(_linesStack.Pop().gameObject);
+
+            if (_currentLineRenderer != null) Destroy(_currentLineRenderer.gameObject);
         }
+
+        public void Register()   => Locator.Register(typeof(IGameView), this);
+        public void Unregister() => Locator.Unregister(typeof(IGameView));
+        #endregion
     }
 }

@@ -5,12 +5,14 @@ using System.IO;
 using System;
 using Internals;
 using Others;
+using UI;
 
 namespace Controllers
 {
-    public class GameplayController : MonoBehaviour
+    public class GameplayController : MonoBehaviour, IGameplayControllable
     {
-        [SerializeField] private GameWindow _gameWindow;
+        private IGameView       _gameWindow;
+        private IRealtimeWidget _realtimeWidget;
 
         private SettingsProject _settingsProject = null;
         private int             _currentLevel    = 0;
@@ -18,9 +20,12 @@ namespace Controllers
         private bool            _isGame          = false;
         private int             _currentScore    = 0;
 
-        public bool IsGame => _isGame;
+        public int CurrentScore => _currentScore;
 
         public event Action OnStartGame;
+
+        private void Awake() => Register();
+        private void OnDestroy() => Unregister();
 
         private void Start()
         {
@@ -34,8 +39,6 @@ namespace Controllers
                 _settingsProject = new SettingsProject();
                 File.WriteAllText(path, JsonConvert.SerializeObject(_settingsProject));
             }
-
-            _gameWindow.OnWallsConnected += NextLevel;
         }
 
         private void Update()
@@ -47,15 +50,16 @@ namespace Controllers
                     FinishGame();
                 }
                 _timerLevel -= Time.deltaTime;
-                Locator.UiSwitcher.UiGameMenu.SetTimer(_timerLevel);
+                _realtimeWidget.SetTimer(_timerLevel);
             }
         }
 
+        #region Interfaces
         public void NextLevel()
         {
             _currentLevel++;
             _currentScore += _settingsProject.AddScoreOnNextLevel;
-            Locator.UiSwitcher.UiGameMenu.SetLevel(_currentLevel);
+            _realtimeWidget.SetLevel(_currentLevel);
             _gameWindow.ClearWindow();
             _gameWindow.CreateWalls(_settingsProject.StartN + _currentLevel * _settingsProject.ChangeNOnNextLevel);
             _timerLevel = _settingsProject.StartM - _currentLevel * _settingsProject.ChangeMOnNextLevel;
@@ -64,11 +68,13 @@ namespace Controllers
 
         public void StartGame()
         {
-            Locator.UiSwitcher.GameMenu();
+            _gameWindow     = Locator.GetObject<IGameView>();
+            _realtimeWidget = Locator.GetObject<IRealtimeWidget>();
+            _gameWindow.OnWallsConnected += NextLevel;
+            _realtimeWidget.Show();
             _currentLevel = 1;
             _currentScore = 0;
-            Locator.UiSwitcher.UiGameMenu.SetLevel(_currentLevel);
-            _gameWindow.ClearWindow();
+            _realtimeWidget.SetLevel(_currentLevel);
             _gameWindow.CreateWalls(_settingsProject.StartN + _currentLevel * _settingsProject.ChangeNOnNextLevel);
             _timerLevel = _settingsProject.StartM - _currentLevel * _settingsProject.ChangeMOnNextLevel;
             _isGame = true;
@@ -77,9 +83,16 @@ namespace Controllers
 
         public void FinishGame()
         {
+            _gameWindow.OnWallsConnected -= NextLevel;
             _gameWindow.ClearWindow();
-            Locator.UiSwitcher.FinishGame(_currentScore);
+            Locator.GetObject<IFinishWidget>().Show();
             _isGame = false;
         }
+
+        public bool IsGame() => _isGame;
+
+        public void Register() => Locator.Register(typeof(IGameplayControllable), this);
+        public void Unregister() => Locator.Unregister(typeof(IGameplayControllable));
+        #endregion
     }
 }

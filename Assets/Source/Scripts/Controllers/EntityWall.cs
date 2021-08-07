@@ -1,17 +1,23 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Internals;
+using Inputs;
+using UnityEngine.EventSystems;
 
 namespace Controllers
 {
+    [RequireComponent(typeof(BoxCollider2D), typeof(Image))]
     public class EntityWall : MonoBehaviour
     {
-        [SerializeField] private Image _Image;
-        [SerializeField] private BoxCollider2D _BoxCollider2D;
-        public Image Image => _Image;
-        public BoxCollider2D BoxCollider2D => _BoxCollider2D;
+        [HideInInspector] public bool IsConnected;
 
-        public bool IsConnected;
+        public Image         Image { private set; get; }
+        public BoxCollider2D BoxCollider2D { private set; get; }
+
+        private void Awake()
+        {
+            Image         = GetComponent<Image>();
+            BoxCollider2D = GetComponent<BoxCollider2D>();
+        }
     }
 }

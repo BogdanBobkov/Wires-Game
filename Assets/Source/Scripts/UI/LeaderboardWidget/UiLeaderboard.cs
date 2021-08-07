@@ -5,11 +5,14 @@ using System.IO;
 using TMPro;
 using UnityEngine;
 using Others;
+using System;
+using Controllers;
 
 namespace UI
 {
-    public class UiLeaderboard : UiCanvas
+    public class UiLeaderboard : WidgetBase, ILeaderboardWidget
     {
+
         [SerializeField] private GameObject _PrefabContent;
 
         private List<GameObject> _Content = new List<GameObject>();
@@ -20,7 +23,15 @@ namespace UI
 
         private string PathFile;
 
-        public void Show(int score, string name)
+        private void Awake() => Register();
+        private void OnDestroy() => Unregister();
+
+        #region Interfaces
+        public override void Register() => Locator.Register(typeof(ILeaderboardWidget), this);
+        public override void Unregister() => Locator.Unregister(typeof(ILeaderboardWidget));
+        #endregion
+
+        public void SetLeaderboard(int score, string name)
         {
             PathFile = Path.Combine(Application.temporaryCachePath, PublicConst.LeaderboardFile);
 
@@ -39,10 +50,9 @@ namespace UI
 
             var player = new LeaderBoard.Player(score, name);
             TryInsertPlayerToLeaderBoard(player);
+            CreateLeaderboardGOs();
 
             File.WriteAllText(PathFile, JsonConvert.SerializeObject(_leaderBoard));
-
-            gameObject.SetActive(true);
         }
 
         private void TryInsertPlayerToLeaderBoard(LeaderBoard.Player player)
@@ -67,11 +77,9 @@ namespace UI
             {
                 _leaderBoard.bestPlayers.Insert(newCount, player);
             }
-
-            CreateLeaderboard();
         }
 
-        private void CreateLeaderboard()
+        private void CreateLeaderboardGOs()
         {
             foreach(var player in _leaderBoard.bestPlayers)
             {
@@ -82,9 +90,9 @@ namespace UI
             }
         }
 
-        public void ReplayGame() => Locator.GameplayController.StartGame();
+        public void ReplayGame() => Hide(() => Locator.GetObject<IGameplayControllable>().StartGame());
 
-        public override void Hide()
+        public override void Hide(Action afterShow)
         {
             foreach(var element in _Content)
             {
@@ -92,7 +100,7 @@ namespace UI
             }
             _Content.Clear();
 
-            this.gameObject.SetActive(false);
+            base.Show(afterShow);
         }
     }
 }
