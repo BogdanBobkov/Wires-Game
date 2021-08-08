@@ -1008,13 +1008,14 @@ GameObject:
   - component: {fileID: 7821022764937140660}
   - component: {fileID: 7821022764937140663}
   - component: {fileID: 7821022764937140662}
+  - component: {fileID: 7821022764953792272}
   m_Layer: 5
   m_Name: Canvas GameOver
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &7821022764937140658
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1108,5 +1109,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30835cc47521a52418ab5cd8484aa8b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _showTime: 1
+  _hideTime: 0
   _CongratsText: {fileID: 1054619939}
   _InputName: {fileID: 2102341756}
+--- !u!225 &7821022764953792272
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7821022764937140665}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0

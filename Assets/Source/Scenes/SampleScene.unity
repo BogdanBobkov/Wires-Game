@@ -557,10 +557,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas GameRealtime
       objectReference: {fileID: 0}
-    - target: {fileID: 2066108756520915884, guid: 8519a6ed76d038142a1bf1a75fe64234, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8519a6ed76d038142a1bf1a75fe64234, type: 3}
 --- !u!1001 &4672598003719718845
@@ -658,10 +654,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas StartMenu
       objectReference: {fileID: 0}
-    - target: {fileID: 4672598003659660360, guid: f43799a4cfab11c42970ec67ee8fe1b9, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f43799a4cfab11c42970ec67ee8fe1b9, type: 3}
 --- !u!1001 &7672694265575853691
@@ -671,6 +663,26 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1060255579, guid: 589f4333c011f724996b94249bf3e73e, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1060255579, guid: 589f4333c011f724996b94249bf3e73e, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1060255579, guid: 589f4333c011f724996b94249bf3e73e, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1768875553, guid: 589f4333c011f724996b94249bf3e73e, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1768875553, guid: 589f4333c011f724996b94249bf3e73e, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7672694264785404627, guid: 589f4333c011f724996b94249bf3e73e, type: 3}
       propertyPath: m_Pivot.x
       value: 0

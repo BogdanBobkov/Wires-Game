@@ -120,7 +120,6 @@ namespace Controllers
 
                         if (_connectedWallsCount == _amountWallsAtMap)
                         {
-                            _connectedWallsCount = 0;
                             OnWallsConnected?.Invoke();
                         }
 
@@ -150,7 +149,8 @@ namespace Controllers
 
         public void CreateWalls(int numWalls)
         {
-            _amountWallsAtMap = numWalls;
+            _amountWallsAtMap    = numWalls;
+            _connectedWallsCount = 0;
 
             Stack<Color> colors = new Stack<Color>();
 

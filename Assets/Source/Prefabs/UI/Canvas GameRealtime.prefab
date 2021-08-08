@@ -281,13 +281,14 @@ GameObject:
   - component: {fileID: 2066108756520915887}
   - component: {fileID: 2066108756520915886}
   - component: {fileID: 2066108756520915885}
+  - component: {fileID: 2066108757506521078}
   m_Layer: 5
   m_Name: Canvas GameRealtime
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2066108756520915881
 RectTransform:
   m_ObjectHideFlags: 0
@@ -382,5 +383,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffe3896ee8891e146854faa146e5fbf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _showTime: 1
+  _hideTime: 0
   _LevelText: {fileID: 188089230}
   _TimerText: {fileID: 1660050633}
+--- !u!225 &2066108757506521078
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2066108756520915884}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0

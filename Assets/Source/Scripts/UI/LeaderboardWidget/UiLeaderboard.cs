@@ -100,7 +100,7 @@ namespace UI
             }
             _Content.Clear();
 
-            base.Show(afterShow);
+            base.Hide(afterShow);
         }
     }
 }

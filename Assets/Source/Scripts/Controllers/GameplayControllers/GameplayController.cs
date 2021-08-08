@@ -71,7 +71,7 @@ namespace Controllers
             _gameWindow     = Locator.GetObject<IGameView>();
             _realtimeWidget = Locator.GetObject<IRealtimeWidget>();
             _gameWindow.OnWallsConnected += NextLevel;
-            _realtimeWidget.Show();
+            Locator.GetObject<IStartableWidget>().Hide(() => { _realtimeWidget.Show(); });
             _currentLevel = 1;
             _currentScore = 0;
             _realtimeWidget.SetLevel(_currentLevel);
@@ -85,7 +85,7 @@ namespace Controllers
         {
             _gameWindow.OnWallsConnected -= NextLevel;
             _gameWindow.ClearWindow();
-            Locator.GetObject<IFinishWidget>().Show();
+            _realtimeWidget.Hide(() => { Locator.GetObject<IFinishWidget>().Show(); });
             _isGame = false;
         }
 
